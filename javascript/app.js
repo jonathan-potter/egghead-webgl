@@ -3,6 +3,7 @@ var gl, shaderProgram;
 
 initGL();
 createShaders();
+createVertices();
 draw();
 
 function initGL() {
@@ -15,9 +16,12 @@ function initGL() {
 
 function createShaders() {
   var vs = `
+    attribute vec4 coords;
+    attribute float pointSize;
+
     void main() {
-      gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
-      gl_PointSize = 10.0;
+      gl_Position = coords;
+      gl_PointSize = pointSize;
     }
   `;
 
@@ -26,8 +30,12 @@ function createShaders() {
   gl.compileShader(vertexShader);
 
   var fs = `
+    precision highp float;
+
+    uniform vec4 color;
+
     void main() {
-      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      gl_FragColor = color;
     }
   `;
 
@@ -41,6 +49,17 @@ function createShaders() {
 
   gl.linkProgram(shaderProgram);
   gl.useProgram(shaderProgram);
+}
+
+function createVertices() {
+  var coords = gl.getAttribLocation(shaderProgram, 'coords');
+  gl.vertexAttrib3f(coords, 0.5, 0, 0);
+
+  var pointSize = gl.getAttribLocation(shaderProgram, 'pointSize');
+  gl.vertexAttrib1f(pointSize, 100.0);
+
+  var color = gl.getUniformLocation(shaderProgram, 'color');
+  gl.uniform4f(color, 0, 1.0, 0.0, 1.0);
 }
 
 function draw() {
