@@ -1,4 +1,8 @@
-var gl, shaderProgram, vertices, angle = 0;
+var gl, shaderProgram, vertices;
+
+var matrix = mat4.create();
+
+var VERTEX_COUNT = 30;
 
 
 initGL();
@@ -28,11 +32,12 @@ function createShaders() {
 }
 
 function createVertices() {
-  vertices = [
-    -0.3, -0.3, 0.0,
-     0.3, -0.3, 0.0,
-     0.0,  0.3, 0.0
-  ];
+  vertices = [];
+  for(var i = 0; i < VERTEX_COUNT; i++) {
+    vertices.push(Math.random() * 2 - 1);
+    vertices.push(Math.random() * 2 - 1);
+    vertices.push(Math.random() * 2 - 1);
+  }
 
   var buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -52,42 +57,15 @@ function createVertices() {
 }
 
 function draw() {
-  rotateY(angle += 0.01)
+  mat4.rotateX(matrix, matrix, 0.03);
+  mat4.rotateY(matrix, matrix, 0.02);
+  mat4.rotateZ(matrix, matrix, 0.01);
+
+  var transformMatrix = gl.getUniformLocation(shaderProgram, 'transformMatrix');
+  gl.uniformMatrix4fv(transformMatrix, false, matrix)
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.drawArrays(gl.TRIANGLES, 0, VERTEX_COUNT);
 
   requestAnimationFrame(draw)
-}
-
-function rotateZ(angle) {
-  var cos, sin, matrix;
-
-  cos = Math.cos(angle);
-  sin = Math.sin(angle);
-
-  matrix = new Float32Array(
-            [cos, sin, 0, 0,
-            -sin, cos, 0, 0,
-               0,   0, 1, 0,
-               0,   0, 0, 1]);
-
-  var transformMatrix = gl.getUniformLocation(shaderProgram, 'transformMatrix');
-  gl.uniformMatrix4fv(transformMatrix, false, matrix);
-}
-
-function rotateY(angle) {
-  var cos, sin, matrix;
-
-  cos = Math.cos(angle);
-  sin = Math.sin(angle);
-
-  matrix = new Float32Array(
-            [cos, 0, sin, 0,
-               0, 1,   0, 0,
-            -sin, 0, cos, 0,
-               0, 0,   0, 1]);
-
-  var transformMatrix = gl.getUniformLocation(shaderProgram, 'transformMatrix');
-  gl.uniformMatrix4fv(transformMatrix, false, matrix);
 }
