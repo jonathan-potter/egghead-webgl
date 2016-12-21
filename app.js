@@ -65,6 +65,14 @@ function createVertices () {
 
   // var color = gl.getUniformLocation(shaderProgram, "color")
   // gl.uniform4f(color, 0, 1, 0, 1)
+
+  let perspectiveMatrix = mat4.create();
+  mat4.perspective(perspectiveMatrix, 1, canvas.width / canvas.height, 0.1, 10)
+
+  perspectiveLocation = gl.getUniformLocation(shaderProgram, "perspectiveMatrix");
+  gl.uniformMatrix4fv(perspectiveLocation, false, perspectiveMatrix)
+
+  mat4.translate(matrix, matrix, [0, 0, -4])
 }
 
 function draw() {
