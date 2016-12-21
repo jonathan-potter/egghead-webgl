@@ -1,7 +1,18 @@
 let gl,
     shaderProgram,
     vertices,
-    vertexCount = 5000
+    vertexCount = 5000,
+    mouseX = 0,
+    mouseY = 0
+
+canvas.addEventListener('mousemove', function (event) {
+  mouseX = map(event.clientX, 0, canvas.width, -1, 1)
+  mouseY = map(event.clientY, 0, canvas.height, 1, -1)
+});
+
+function map(value, minSrc, maxSrc, minDst, maxDst) {
+  return (value - minSrc) / (maxSrc - minSrc) * (maxDst - minDst) + minDst
+}
 
 initGL()
 createShader()
@@ -55,6 +66,16 @@ function createVertices () {
 
 function draw() {
   for(var i = 0; i < vertexCount * 2; i +=2) {
+    const dx = vertices[i + 0] - mouseX;
+    const dy = vertices[i + 1] - mouseY;
+
+    const dist = Math.sqrt(dx * dx + dy * dy)
+
+    if (dist < 0.2) {
+      vertices[i + 0] = mouseX + dx / dist * 0.2
+      vertices[i + 1] = mouseY + dy / dist * 0.2
+    }
+
     vertices[i + 0] += Math.random() * 0.01 - 0.005;
     vertices[i + 1] += Math.random() * 0.01 - 0.005;
   }
