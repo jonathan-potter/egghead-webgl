@@ -2,13 +2,12 @@ let gl,
     shaderProgram,
     vertices,
     matrix = mat4.create(),
-    indexCount
-    // vertexCount = 30
+    vertexCount
 
 initGL()
 createShader()
 createVertices()
-createIndices()
+loadTexture()
 draw()
 
 function initGL() {
@@ -33,23 +32,19 @@ function createShader() {
 
 function createVertices () {
   vertices = [
-    -1, -1, -1, 1, 0, 0, 1,
-     1, -1, -1, 1, 1, 0, 1,
-    -1, -1,  1, 1, 0, 1, 1,
-     1, -1,  1, 1, 1, 0, 1,
-    -1,  1,  1, 1, 0, 1, 1,
-     1,  1,  1, 1, 1, 0, 1,
-    -1,  1, -1, 1, 0, 1, 1,
-     1,  1, -1, 1, 1, 0, 1
+    -1, -1,  0, 0,
+     1, -1,  1, 0,
+    -1,  1,  0, 1,
+     1,  1,  1, 1
   ]
-  vertexCount = 8
+  vertexCount = vertices.length / 4
 
   var buffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 
   var coords = gl.getAttribLocation(shaderProgram, "coords")
-  gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 7, 0)
+  gl.vertexAttribPointer(coords, 2, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 4, 0)
   gl.enableVertexAttribArray(coords)
   // gl.bindBuffer(gl.ARRAY_BUFFER, null)
 
@@ -57,9 +52,9 @@ function createVertices () {
   // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)
   // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
   //
-  var colorsLocation = gl.getAttribLocation(shaderProgram, "colors")
-  gl.vertexAttribPointer(colorsLocation, 4, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 7, Float32Array.BYTES_PER_ELEMENT * 3)
-  gl.enableVertexAttribArray(colorsLocation)
+  var textureCoords = gl.getAttribLocation(shaderProgram, "textureCoords")
+  gl.vertexAttribPointer(textureCoords, 2, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 4, Float32Array.BYTES_PER_ELEMENT * 2)
+  gl.enableVertexAttribArray(textureCoords)
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
 
   var pointSize = gl.getAttribLocation(shaderProgram, "pointSize")
@@ -77,20 +72,21 @@ function createVertices () {
   mat4.translate(matrix, matrix, [0, 0, -4])
 }
 
-function createIndices() {
-  const indices = [
-    0, 1, 2,  1, 2, 3,
-    2, 3, 4,  3, 4, 5,
-    4, 5, 6,  5, 6, 7,
-    6, 7, 0,  7, 0, 1,
-    0, 2, 6,  2, 6, 4,
-    1, 3, 7,  3, 7, 5
-  ]
-  indexCount = indices.length
+function loadTexture() {
+  const image = document.createElement("img");
+  image.crossOrigin = "";
+  image.addEventListener("load", function () {
+    const texture = gl.createTexture()
+    const sampler = gl.getUniformLocation(shaderProgram, "sampler")
 
-  const indexBuffer = gl.createBuffer()
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW)
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image)
+    gl.uniform1i(sampler, 0);
+  })
+  image.src = "other_thing.png"
 }
 
 function draw() {
@@ -102,8 +98,8 @@ function draw() {
   gl.uniformMatrix4fv(transformMatrix, false, matrix)
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount)
-  gl.drawElements(gl.TRIANGLES, indexCount, gl.UNSIGNED_BYTE, 0)
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount)
+  // gl.drawElements(gl.TRIANGLES, indexCount, gl.UNSIGNED_BYTE, 0)
 
   requestAnimationFrame(draw)
 }
