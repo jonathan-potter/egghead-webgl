@@ -1,8 +1,8 @@
 let gl,
     shaderProgram,
     vertices,
-    matrix = mat4.create(),
-    vertexCount = 30
+    matrix = mat4.create()
+    // vertexCount = 30
 
 initGL()
 createShader()
@@ -32,15 +32,33 @@ function createShader() {
 function createVertices () {
   vertices = []
   const colors = []
-  for(var i = 0; i < vertexCount; i++) {
-    vertices.push(Math.random() * 2 - 1)
-    vertices.push(Math.random() * 2 - 1)
-    vertices.push(Math.random() * 2 - 1)
-    vertices.push(Math.random())
-    vertices.push(Math.random())
-    vertices.push(Math.random())
-    vertices.push(1)
+  for (var i = 0; i < 2; i += 0.01) {
+    vertices.push(i - 1);
+    vertices.push(-0.3);
+    vertices.push(Math.sin(i * 10) * 0.2);
+    vertices.push(i / 2);
+    vertices.push(0);
+    vertices.push(i - i / 2);
+    vertices.push(1);
+
+    vertices.push(i - 1);
+    vertices.push(+0.3);
+    vertices.push(Math.sin(i * 10) * 0.2);
+    vertices.push(i - i / 2);
+    vertices.push(i / 2);
+    vertices.push(1);
+    vertices.push(1);
   }
+  vertexCount = vertices.length / 7;
+  // for(var i = 0; i < vertexCount; i++) {
+  //   vertices.push(Math.random() * 2 - 1)
+  //   vertices.push(Math.random() * 2 - 1)
+  //   vertices.push(Math.random() * 2 - 1)
+  //   vertices.push(Math.random())
+  //   vertices.push(Math.random())
+  //   vertices.push(Math.random())
+  //   vertices.push(1)
+  // }
 
   var buffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
@@ -67,12 +85,12 @@ function createVertices () {
   // gl.uniform4f(color, 0, 1, 0, 1)
 
   let perspectiveMatrix = mat4.create();
-  mat4.perspective(perspectiveMatrix, 1, canvas.width / canvas.height, 0.1, 10)
+  mat4.perspective(perspectiveMatrix, 1.3, canvas.width / canvas.height, 0.1, 10)
 
   perspectiveLocation = gl.getUniformLocation(shaderProgram, "perspectiveMatrix");
   gl.uniformMatrix4fv(perspectiveLocation, false, perspectiveMatrix)
 
-  mat4.translate(matrix, matrix, [0, 0, -4])
+  mat4.translate(matrix, matrix, [0, 0, -2])
 }
 
 function draw() {
@@ -84,7 +102,7 @@ function draw() {
   gl.uniformMatrix4fv(transformMatrix, false, matrix)
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLES, 0, vertexCount)
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexCount)
 
   requestAnimationFrame(draw)
 }
