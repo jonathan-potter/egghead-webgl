@@ -17,7 +17,7 @@ function initGL() {
   gl = canvas.getContext('webgl')
   gl.enable(gl.DEPTH_TEST)
   gl.viewport(0, 0, canvas.width, canvas.height)
-  gl.clearColor(1, 1, 1, 1);
+  gl.clearColor(0, 0, 0, 1);
 }
 
 function createShader() {
@@ -33,40 +33,48 @@ function createShader() {
 
 function createVertices () {
   vertices = [
-    -1, -1, -1, 1, 0, 0, 1,
-     1, -1, -1, 1, 1, 0, 1,
-    -1, -1,  1, 1, 0, 1, 1,
-     1, -1,  1, 1, 1, 0, 1,
-    -1,  1,  1, 1, 0, 1, 1,
-     1,  1,  1, 1, 1, 0, 1,
-    -1,  1, -1, 1, 0, 1, 1,
-     1,  1, -1, 1, 1, 0, 1
+    -1, -1, -1,
+     1, -1, -1,
+    -1, -1,  1,
+     1, -1,  1,
+    -1,  1,  1,
+     1,  1,  1,
+    -1,  1, -1,
+     1,  1, -1
   ]
-  vertexCount = 8
+  vertexCount = vertices.length / 3
 
   var buffer = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 
   var coords = gl.getAttribLocation(shaderProgram, "coords")
-  gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 7, 0)
+  gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(coords)
-  // gl.bindBuffer(gl.ARRAY_BUFFER, null)
 
-  // var colorBuffer = gl.createBuffer()
-  // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)
-  // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
-  //
-  var colorsLocation = gl.getAttribLocation(shaderProgram, "colors")
-  gl.vertexAttribPointer(colorsLocation, 4, gl.FLOAT, false, Float32Array.BYTES_PER_ELEMENT * 7, Float32Array.BYTES_PER_ELEMENT * 3)
-  gl.enableVertexAttribArray(colorsLocation)
+  const normals = [
+     0,  0,  1,    0,  0,  1,    0,  0,  1,    0,  0,  1,
+     0,  1,  0,    0,  1,  0,    0,  1,  0,    0,  1,  0,
+     0,  0, -1,    0,  0, -1,    0,  0, -1,    0,  0, -1,
+     0, -1,  0,    0, -1,  0,    0, -1,  0,    0, -1,  0,
+    -1,  0,  0,   -1,  0,  0,   -1,  0,  0,   -1,  0,  0,
+     1,  0,  0,    1,  0,  0,    1,  0,  0,    1,  0,  0
+  ]
+
+  const normalBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW)
+
+  const normalLocation = gl.getAttribLocation(shaderProgram, "normal")
+  gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(normalLocation)
   gl.bindBuffer(gl.ARRAY_BUFFER, null)
 
-  var pointSize = gl.getAttribLocation(shaderProgram, "pointSize")
-  gl.vertexAttrib1f(pointSize, 10)
+  var lightColor = gl.getUniformLocation(shaderProgram, "lightColor")
+  gl.uniform3f(lightColor, 1, 1, 1)
 
-  // var color = gl.getUniformLocation(shaderProgram, "color")
-  // gl.uniform4f(color, 0, 1, 0, 1)
+  const lightDirection = gl.getUniformLocation(shaderProgram, "lightDirection")
+  gl.uniform3f(lightDirection, 0.5, 1, 0)
 
   let perspectiveMatrix = mat4.create();
   mat4.perspective(perspectiveMatrix, 1, canvas.width / canvas.height, 0.1, 10)
